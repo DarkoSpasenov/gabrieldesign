@@ -160,18 +160,6 @@
     function closeLb() { lb.classList.remove('open'); document.body.style.overflow = ''; }
   }
 
-  /* ---------- Comparateur avant / après ---------- */
-  function initBeforeAfter() {
-    const range = $('#baRange'), after = $('#baAfter'), handle = $('#baHandle');
-    if (!range) return;
-    const set = v => {
-      after.style.clipPath = `inset(0 0 0 ${v}%)`;
-      handle.style.left = v + '%';
-    };
-    range.addEventListener('input', () => set(range.value));
-    set(50);
-  }
-
   /* ---------- Navigation : sticky, menu mobile, lien actif ---------- */
   function initNav() {
     const header = $('#header'), toggle = $('#navToggle'), menu = $('#menu');
