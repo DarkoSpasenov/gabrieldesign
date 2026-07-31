@@ -115,6 +115,8 @@
       $$('.gallery__item', grid).forEach(item => {
         item.classList.toggle('hide', !(cat === 'all' || item.dataset.cat === cat));
       });
+      grid.scrollTo({ left: 0, behavior: 'smooth' }); // revenir au début du slider
+      grid.dispatchEvent(new Event('scroll'));
     });
 
     // lightbox
@@ -160,16 +162,34 @@
     function closeLb() { lb.classList.remove('open'); document.body.style.overflow = ''; }
   }
 
-  /* ---------- Comparateur avant / après ---------- */
-  function initBeforeAfter() {
-    const range = $('#baRange'), after = $('#baAfter'), handle = $('#baHandle');
-    if (!range) return;
-    const set = v => {
-      after.style.clipPath = `inset(0 0 0 ${v}%)`;
-      handle.style.left = v + '%';
-    };
-    range.addEventListener('input', () => set(range.value));
-    set(50);
+  /* ---------- Sliders (services & réalisations) ---------- */
+  function initCarousels() {
+    $$('[data-carousel]').forEach(root => {
+      const track = $('.carousel__track', root);
+      const prev = $('.carousel__prev', root);
+      const next = $('.carousel__next', root);
+      if (!track) return;
+
+      const stepBy = () => {
+        const first = track.querySelector(':scope > *:not(.hide)');
+        const card = first ? first.getBoundingClientRect().width + 16 : track.clientWidth * 0.8;
+        // avance d'environ une "page" visible (multiple de la largeur d'une carte)
+        const perPage = Math.max(1, Math.round(track.clientWidth / card));
+        return card * perPage;
+      };
+
+      const update = () => {
+        const max = track.scrollWidth - track.clientWidth - 2;
+        if (prev) prev.disabled = track.scrollLeft <= 2;
+        if (next) next.disabled = track.scrollLeft >= max;
+      };
+
+      if (prev) prev.addEventListener('click', () => track.scrollBy({ left: -stepBy(), behavior: 'smooth' }));
+      if (next) next.addEventListener('click', () => track.scrollBy({ left: stepBy(), behavior: 'smooth' }));
+      track.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update);
+      update();
+    });
   }
 
   /* ---------- Navigation : sticky, menu mobile, lien actif ---------- */
@@ -260,7 +280,7 @@
     renderServices();
     renderGallery();
     initLightbox();
-    initBeforeAfter();
+    initCarousels();
     initNav();
     initReveal();
     initWhatsApp();
